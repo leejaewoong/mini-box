@@ -7,7 +7,7 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import DragDropZone from "@/components/dragDropZone";
-import ImageList from "@/components/imageList";
+import CardList from "@/components/cardList";
   
 export default function Ui() {
   const [searchInput, setSearchInput] = useState("");
@@ -44,7 +44,7 @@ export default function Ui() {
       <DragDropZone />
 
       {/* Image List */}
-      <ImageList />
+      <CardList />
     </main>      
   );
 }
