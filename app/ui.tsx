@@ -14,7 +14,7 @@ export default function Ui() {
 
   return (
     <main
-      className='flex flex-col w-full p-2 gap-4'>
+      className='flex w-3/4 flex-col m-auto my-5 p-2 gap-4'>
       {/* Logo */}
       <Logo />
 
@@ -44,7 +44,7 @@ export default function Ui() {
       <DragDropZone />
 
       {/* Image List */}
-      <CardList />
+      <CardList searchInput={ searchInput }/>
     </main>      
   );
 }
