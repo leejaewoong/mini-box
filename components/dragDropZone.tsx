@@ -1,14 +1,12 @@
 'use client'
 
 import { Upload, Loader2 } from "lucide-react";
-import { useState, useCallback } from "react";
 import { UploadFile } from "actions/storageActions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useDropzone } from "react-dropzone";
 
 export default function DragDropZone() {
-    const [isLoading, setIsLoading] = useState(false);
     const queryClient = useQueryClient();
     const uploadFileMutation = useMutation(
         {
@@ -21,26 +19,21 @@ export default function DragDropZone() {
             },
             onError: (error) => {
                 toast.error("파일 업로드 중 오류가 발생했습니다: " + error.message);
-            },
-            onSettled: () => {
-                setIsLoading(false);
             }
         }
     )
 
-    const onDrop = useCallback(async(acceptedFiles: File[]) => {
-        console.log('onDrop called:', acceptedFiles);
+    const onDrop = (acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
-            setIsLoading(true);
             const formData = new FormData();
 
             acceptedFiles.forEach(file =>
                 formData.append(file.name, file)
             );
-            
-            await uploadFileMutation.mutate(formData);
+
+            uploadFileMutation.mutate(formData);
         }
-    }, [uploadFileMutation])    
+    }    
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop, 
@@ -60,7 +53,7 @@ export default function DragDropZone() {
                         : 'border-indigo-300 hover:border-indigo-400 hover:bg-indigo-50/50'
                 }`}
             >
-                {isLoading ? <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /> : <Upload className="w-8 h-8 text-indigo-400" />}
+                {uploadFileMutation.isPending ? <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /> : <Upload className="w-8 h-8 text-indigo-400" />}
                 <div className="flex flex-col items-center gap-1">
                     <p className="text-sm font-medium text-gray-700">
                         {isDragActive ? '여기에 파일을 놓으세요' : '파일을 여기에 끌어다 놓거나 클릭하여 업로드하세요'}
