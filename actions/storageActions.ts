@@ -11,25 +11,33 @@ function handleError(error: any) {
 
 export async function UploadFile(formData: FormData) {
     const supabase = await createServerSupabaseClient();
-    const file = formData.get("file") as File;
+    
+    const files = Array.from(formData.entries()).map(
+        ([name, file]) => file as File
+    )    
 
-    // 원본 파일명과 확장자 추출
-    const originalName = file.name;
-    const fileExt = file.name.split('.').pop();
+    const results = await Promise.all(
+        files.map(async (file) => {
+            // 원본 파일명과 확장자 추출
+            const originalName = file.name;
+            const fileExt = file.name.split('.').pop();
 
-    // 안전한 파일명 생성 (영문/숫자만 사용)
-    const safeFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            // 안전한 파일명 생성 (영문/숫자만 사용)
+            const safeFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
-        .from(process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET!)
-        .upload(safeFileName, file, {
-            upsert: true,
-            metadata: { originalName }
-        });
+            const { data, error } = await supabase.storage
+                .from(process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET!)
+                .upload(safeFileName, file, {
+                    upsert: true,
+                    metadata: { originalName }
+                });
 
-    handleError(error);
+            handleError(error);
+            return data;
+        })
+    );
 
-    return data;
+    return results;
 }
 
 export async function SearchFiles(search: string = "") {
@@ -69,3 +77,14 @@ export async function SearchFiles(search: string = "") {
     return filesWithMetadata;
 }
 
+export async function DeleteFile(fileName: string) {
+    const supabase = await createServerSupabaseClient();
+    
+    const { data, error } = await supabase.storage
+    .from(process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET!)
+    .remove([fileName])
+
+    handleError(error);
+
+    return data;
+}
